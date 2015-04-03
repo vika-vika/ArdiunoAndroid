@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">ArduinoAndroid</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_navigation">Navigation</string>
+
+    <string name="title_section1">Section 1</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_section3">Section 3</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_example">Example action</string>
+    <string name="font_digital_tech">fonts/digital_tech.otf</string>
+    <string name="font_protoculture">fonts/protoculture.otf</string>
+    <string name="font_mode_seven">fonts/mode_seven.ttf</string>
+    <string name="font_directive_four">fonts/directive_four.otf</string>
+    <string name="font_schutzgitterhausgrotesk_nbp">fonts/schutzgitterhausgrotesk_nbp.ttf</string>
+
+</resources>

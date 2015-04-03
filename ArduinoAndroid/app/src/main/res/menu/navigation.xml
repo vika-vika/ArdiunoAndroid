@@ -1,0 +1,7 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="net.vnz.arduinoandroid.navigation.NavigationActivity">
+    <item android:id="@+id/action_connect" android:title="Connect"
+        android:icon="@drawable/device_not_selected"
+        android:showAsAction="always" />
+</menu>

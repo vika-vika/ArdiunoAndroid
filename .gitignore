@@ -1,0 +1,5 @@
+*.iml
+/ArduinoAndroid/.gradle/2.2.1/taskArtifacts
+/ArduinoAndroid/.idea
+/ArduinoAndroid/build/intermediates/dex-cache
+/ArduinoAndroid/gradle/

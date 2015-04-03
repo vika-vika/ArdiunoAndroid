@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:vnnz="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <net.vnnz.arduinoandroid.view.FontTextView
+        style="@style/Text"
+        android:id="@+id/device_name"
+        android:textSize="18dp"
+        android:paddingBottom="5dp"/>
+
+    <net.vnnz.arduinoandroid.view.FontTextView
+        style="@style/Text"
+        android:id="@+id/device_mac"
+        android:textSize="13dp"
+        android:paddingBottom="10dp"/>
+
+</LinearLayout>
