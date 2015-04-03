@@ -62,6 +62,7 @@ public class DeviceAdapter extends BaseAdapter {
         FontTextView mac  = (FontTextView) view.findViewById(R.id.device_mac);
         name.setText(device.getName());
         mac.setText(device.getAddress());
+        view.setTag(device);
         return view;
 
     }

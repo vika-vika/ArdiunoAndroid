@@ -1,34 +1,34 @@
 package net.vnnz.arduinoandroid.dialog;
 
 import android.app.Dialog;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.graphics.Typeface;
-import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.os.Bundle;;
 import android.view.View;
 import android.view.Window;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
+
 import android.widget.Button;
-import android.widget.LinearLayout;
+
 import android.widget.ListView;
-import android.widget.TextView;
+
 
 import net.vnnz.arduinoandroid.R;
 import net.vnnz.arduinoandroid.adapter.DeviceAdapter;
+import net.vnnz.arduinoandroid.controller.BluetoothController;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Created by viktoriala on 4/2/2015.
  */
-public class DeviceSelectDialog  extends Dialog implements View.OnClickListener {
+public class DeviceSelectDialog  extends Dialog implements View.OnClickListener, AdapterView.OnItemClickListener {
 
-    public DeviceSelectDialog(Context context) {
+    private BluetoothController bluetoothController;
+
+    public DeviceSelectDialog(Context context, BluetoothController bluetoothController) {
         super(context);
+        this.bluetoothController = bluetoothController;
     }
 
     @Override
@@ -38,22 +38,10 @@ public class DeviceSelectDialog  extends Dialog implements View.OnClickListener 
         setContentView(R.layout.dialog_select_device);
 
         ListView deviceList = (ListView) findViewById(R.id.device_list);
-        ArrayList<BluetoothDevice> arr = new ArrayList<BluetoothDevice>();
+        deviceList.setOnItemClickListener(this);
 
-      // deviceList.setAdapter(new ArrayAdapter<String>());
-        BluetoothAdapter mBlueAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBlueAdapter == null) {
-            return;
-        }
+        deviceList.setAdapter(new DeviceAdapter(getContext(), R.layout.list_row_devices, bluetoothController.getPairedDevices()));
 
-        Set<BluetoothDevice> paired = mBlueAdapter.getBondedDevices();
-        if (paired.size() > 0) {
-            for (BluetoothDevice device : paired) {
-                arr.add(device);
-            }
-        }
-
-        deviceList.setAdapter(new DeviceAdapter(getContext(), R.layout.list_row_devices, arr));
         Button scan = (Button) findViewById(R.id.btn_scan);
         scan.setTypeface(Typeface.createFromAsset(getContext().getAssets(), getContext().getString(R.string.font_digital_tech)));
 
@@ -62,5 +50,12 @@ public class DeviceSelectDialog  extends Dialog implements View.OnClickListener 
     @Override
     public void onClick(View v) {
 
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        BluetoothDevice device = (BluetoothDevice) view.getTag();
+        bluetoothController.connect(device);
+       // Toast.makeText(getContext(), "Click", Toast.LENGTH_LONG).show();
     }
 }
