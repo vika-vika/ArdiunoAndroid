@@ -6,6 +6,9 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import android.widget.Toast;
+
+import net.vnnz.arduinoandroid.listener.BluetoothListener;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -21,11 +24,13 @@ public class BluetoothController {
     private final String UUID_VALUE = "00001101-0000-1000-8000-00805f9b34fb";//"21a6d085-401f-4744-a319-97b04e6396c8";
     private Context context;
     private BluetoothAdapter bluetoothAdapter;
-    BluetoothSocket mBlueSocket;
+    private BluetoothSocket mBlueSocket;
+    private BluetoothListener listener;
 
-    public BluetoothController(Context context) {
-        this.context = context;
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    public BluetoothController(BluetoothListener listener) {
+        this.context = listener.getContext();
+        this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        this.listener = listener;
     }
 
     public boolean isBluetoothEnabled(){
@@ -46,26 +51,38 @@ public class BluetoothController {
 
     }
 
-    public boolean connect(BluetoothDevice btDevice){
+    public boolean connect(final BluetoothDevice btDevice) {
 
-        try{
-            Log.e(TAG, "Connecting to the robot...");
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    listener.connectionInitiated(btDevice);
 
-            UUID uuid = UUID.fromString(UUID_VALUE);
+                    Log.d(TAG, "Connecting to the device...");
+                    UUID uuid = UUID.fromString(UUID_VALUE);
 
-            mBlueSocket = btDevice.createRfcommSocketToServiceRecord(uuid);
-            mBlueSocket.connect();
-            OutputStream mOut = mBlueSocket.getOutputStream();
-            InputStream mIn = mBlueSocket.getInputStream();
-            // connected = true;
-            // this.start();
+                    mBlueSocket = btDevice.createRfcommSocketToServiceRecord(uuid);
 
-            Log.e(TAG, "Connected to the robot...");
-            return true;
+                    if (mBlueSocket.isConnected()) {
+                        Log.e(TAG, "Already connected to the device...");
+                        mBlueSocket.close();
+                    }
 
-        }catch (Exception e){
-            Log.e(TAG, "shit happens", e);
-            return false;
-        }
+                    mBlueSocket.connect();
+                    OutputStream mOut = mBlueSocket.getOutputStream();
+                    InputStream mIn = mBlueSocket.getInputStream();
+
+                    Log.d(TAG, "Connected to the device...");
+                    listener.connectionStarted();
+                }catch (Exception e){
+                    Log.e(TAG, "shit happens", e);
+                    listener.connectionFailed();
+                }
+            }
+        });
+        t.start();
+        return true;
+
     }
 }

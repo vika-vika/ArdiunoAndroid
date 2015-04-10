@@ -56,6 +56,6 @@ public class DeviceSelectDialog  extends Dialog implements View.OnClickListener,
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         BluetoothDevice device = (BluetoothDevice) view.getTag();
         bluetoothController.connect(device);
-       // Toast.makeText(getContext(), "Click", Toast.LENGTH_LONG).show();
+        dismiss();
     }
 }
