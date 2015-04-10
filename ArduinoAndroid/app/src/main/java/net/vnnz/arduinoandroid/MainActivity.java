@@ -3,33 +3,23 @@ package net.vnnz.arduinoandroid;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Typeface;
-import android.graphics.drawable.AnimationDrawable;
+
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
-import android.widget.TextView;
+
 import android.widget.Toast;
 
 import net.vnnz.arduinoandroid.controller.BluetoothController;
 import net.vnnz.arduinoandroid.controller.UIController;
 import net.vnnz.arduinoandroid.dialog.DeviceSelectDialog;
 import net.vnnz.arduinoandroid.listener.BluetoothListener;
-
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.UUID;
-
 
 public class MainActivity extends Activity implements BluetoothListener {
 
@@ -49,15 +39,13 @@ public class MainActivity extends Activity implements BluetoothListener {
 
         getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.header_bg));
         bluetoothController = new BluetoothController(this);
-        uiController = new UIController(MainActivity.this);
+        uiController        = new UIController(MainActivity.this);
 
         if (!bluetoothController.isBluetoothEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_TURN_BLUETOOTH);
         }
     }
-
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -79,12 +67,6 @@ public class MainActivity extends Activity implements BluetoothListener {
 
         View nameView = getLayoutInflater().inflate(R.layout.texview_action, null);
         nameItem.setActionView(nameView).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-
-      /*  TextView tv = new TextView(this);
-        tv.setTextColor(getResources().getColor(android.R.color.white));
-        tv.setTypeface(Typeface.createFromAsset(getAssets(), getString(R.string.font_directive_four)));
-        tv.setTextSize(15);
-        nameItem.setActionView(tv).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);*/
         return true;
     }
 
@@ -93,13 +75,20 @@ public class MainActivity extends Activity implements BluetoothListener {
         int id = item.getItemId();
 
         if (id == R.id.action_connect) {
-            DeviceSelectDialog dialog = new DeviceSelectDialog(this, bluetoothController);
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            dialog.show();
+            if (bluetoothController.isDeviceConnected()) {
+                Toast.makeText(this, "Connected", Toast.LENGTH_LONG).show();
+            } else {
+                DeviceSelectDialog dialog = new DeviceSelectDialog(this, bluetoothController);
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                dialog.show();
+            }
             return true;
         }
-
         return super.onOptionsItemSelected(item);
+    }
+
+    public void onSendClick(View view) {
+        bluetoothController.sendData("foo".getBytes());
     }
 
     @Override
@@ -111,6 +100,7 @@ public class MainActivity extends Activity implements BluetoothListener {
     @Override
     public void connectionStarted() {
         uiController.stopStatusAnimation(statusItem, true);
+        bluetoothController.startCommunication();
     }
 
     @Override
@@ -119,12 +109,13 @@ public class MainActivity extends Activity implements BluetoothListener {
     }
 
     @Override
-    public void deviceDisconnected() {
-
+    public void connectionLost() {
+        uiController.setStatus(statusItem, false);
     }
 
     @Override
     public Context getContext() {
         return null;
     }
+
 }

@@ -12,6 +12,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="18dp"
-        android:textColor="#007A00"/>
+        android:textColor="#007A00"
+        android:id="@+id/view" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send"
+        android:id="@+id/btn_send"
+        android:layout_below="@+id/view"
+        android:layout_alignStart="@+id/view"
+        android:layout_marginTop="61dp"
+        android:onClick="onSendClick"/>
+
 
 </RelativeLayout>

@@ -4,12 +4,11 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
-import android.widget.Toast;
 
 import net.vnnz.arduinoandroid.listener.BluetoothListener;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -26,6 +25,8 @@ public class BluetoothController {
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothSocket mBlueSocket;
     private BluetoothListener listener;
+    private CommunicationThread commThread;
+
 
     public BluetoothController(BluetoothListener listener) {
         this.context = listener.getContext();
@@ -33,13 +34,17 @@ public class BluetoothController {
         this.listener = listener;
     }
 
-    public boolean isBluetoothEnabled(){
-        return  bluetoothAdapter.isEnabled();
+    public boolean isBluetoothEnabled() {
+        return bluetoothAdapter.isEnabled();
+    }
+    public boolean isDeviceConnected() {
+        return (mBlueSocket != null)? mBlueSocket.isConnected() : false ;
     }
 
-    private static final String TAG = BluetoothController.class.getSimpleName() ;
 
-    public ArrayList<BluetoothDevice> getPairedDevices (){
+    private static final String TAG = BluetoothController.class.getSimpleName();
+
+    public ArrayList<BluetoothDevice> getPairedDevices() {
         ArrayList<BluetoothDevice> arr = new ArrayList<BluetoothDevice>();
         Set<BluetoothDevice> paired = bluetoothAdapter.getBondedDevices();
         if (paired.size() > 0) {
@@ -52,6 +57,7 @@ public class BluetoothController {
     }
 
     public boolean connect(final BluetoothDevice btDevice) {
+        bluetoothAdapter.cancelDiscovery();
 
         Thread t = new Thread(new Runnable() {
             @Override
@@ -75,7 +81,7 @@ public class BluetoothController {
 
                     Log.d(TAG, "Connected to the device...");
                     listener.connectionStarted();
-                }catch (Exception e){
+                } catch (Exception e) {
                     Log.e(TAG, "shit happens", e);
                     listener.connectionFailed();
                 }
@@ -83,6 +89,86 @@ public class BluetoothController {
         });
         t.start();
         return true;
+    }
 
+    public synchronized void startCommunication() {
+        commThread = new CommunicationThread();
+        commThread.start();
+    }
+
+    public void sendData(byte[] data) {
+        CommunicationThread r;
+
+        synchronized (this) {
+            r = commThread;
+        }
+        if (r != null) {
+            r.write(data);
+        }
+    }
+
+
+    public class CommunicationThread extends Thread {
+        private static final String TAG = "CommunicationThread";
+
+        private final BluetoothSocket mmSocket;
+        private final InputStream mmInStream;
+        private final OutputStream mmOutStream;
+
+        public CommunicationThread() {
+
+
+            mmSocket = mBlueSocket;
+            InputStream tmpIn = null;
+            OutputStream tmpOut = null;
+
+            try {
+                tmpIn = mBlueSocket.getInputStream();
+                tmpOut = mBlueSocket.getOutputStream();
+            } catch (IOException e) {
+                Log.e(TAG, "temp sockets not created", e);
+            }
+
+            mmInStream = tmpIn;
+            mmOutStream = tmpOut;
+        }
+
+        public void run() {;
+            byte[] buffer = new byte[1024];
+            int bytes;
+
+            // Keep listening to the InputStream while connected
+            while (true) {
+                try {
+                    bytes = mmInStream.read(buffer);
+                } catch (IOException e) {
+                    Log.w(TAG, "Communication disconnected", e);
+                    listener.connectionLost();
+                    try {
+                        mBlueSocket.close();
+                    } catch (IOException e1) {
+                        Log.w(TAG, "Unable to close socket", e);
+                        e1.printStackTrace();
+                    }
+                    break;
+                }
+            }
+        }
+
+        public void write(byte[] buffer) {
+            try {
+                mmOutStream.write(buffer);
+            } catch (IOException e) {
+                Log.e(TAG, "Exception during write", e);
+            }
+        }
+
+        public void cancel() {
+            try {
+                mmSocket.close();
+            } catch (IOException e) {
+                Log.e(TAG, "close() of connect socket failed", e);
+            }
+        }
     }
 }

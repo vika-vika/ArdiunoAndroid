@@ -11,7 +11,7 @@ public interface BluetoothListener {
     public void connectionInitiated(BluetoothDevice device);
     public void connectionStarted();
     public void connectionFailed();
-    public void deviceDisconnected();
+    public void connectionLost();
     public Context getContext();
 
 }

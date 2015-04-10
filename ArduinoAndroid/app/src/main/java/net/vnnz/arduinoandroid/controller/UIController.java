@@ -50,4 +50,14 @@ public class UIController {
             }
         });
     }
+
+    public void setStatus(final MenuItem statusItem, final boolean isSucceed) {
+        context.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                int icon = isSucceed ? R.drawable.status_connected : R.drawable.status_disconnected;
+                statusItem.setIcon(icon);
+            }
+        });
+    }
 }
