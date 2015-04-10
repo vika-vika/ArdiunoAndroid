@@ -20,8 +20,9 @@ import net.vnnz.arduinoandroid.controller.BluetoothController;
 import net.vnnz.arduinoandroid.controller.UIController;
 import net.vnnz.arduinoandroid.dialog.DeviceSelectDialog;
 import net.vnnz.arduinoandroid.listener.BluetoothListener;
+import net.vnnz.arduinoandroid.view.WASDControllerView;
 
-public class MainActivity extends Activity implements BluetoothListener {
+public class MainActivity extends Activity implements BluetoothListener, WASDControllerView.WASDListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private final int REQUEST_TURN_BLUETOOTH = 1;
@@ -45,6 +46,9 @@ public class MainActivity extends Activity implements BluetoothListener {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_TURN_BLUETOOTH);
         }
+
+        WASDControllerView wasdView = (WASDControllerView) findViewById(R.id.wasd_view);
+        wasdView.addOnItemClickListener(this);
     }
 
     @Override
@@ -118,4 +122,28 @@ public class MainActivity extends Activity implements BluetoothListener {
         return null;
     }
 
+    @Override
+    public void onWASDItemClicked(int command) {
+        String text = "";
+
+        switch (command) {
+            case WASDControllerView.COMMAND_ACTION:
+                text = "/Пиу-пиу";
+                break;
+            case WASDControllerView.COMMAND_UP:
+                text = "/w";
+                break;
+            case WASDControllerView.COMMAND_DOWN:
+                text = "/s";
+                break;
+            case WASDControllerView.COMMAND_LEFT:
+                text = "/d";
+                break;
+            case WASDControllerView.COMMAND_RIGHT:
+                text = "/a";
+                break;
+        }
+        Toast.makeText(this, text, Toast.LENGTH_LONG).show();
+        bluetoothController.sendData(text.getBytes());
+    }
 }
